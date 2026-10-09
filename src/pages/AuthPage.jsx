@@ -33,7 +33,11 @@ export default function AuthPage() {
       await signIn(loginEmail, loginPassword)
       navigate('/dashboard')
     } catch (err) {
-      setError(err.message || 'Invalid email or password.')
+      if (err.message && err.message.toLowerCase().includes('failed to fetch')) {
+        setError('Failed to connect to backend. Please check that VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in Vercel Environment Variables and Redeployed.')
+      } else {
+        setError(err.message || 'Invalid email or password.')
+      }
     } finally {
       setLoading(false)
     }
@@ -51,7 +55,11 @@ export default function AuthPage() {
       setSuccess('Account created! Please check your email to confirm, then sign in.')
       setTab('login')
     } catch (err) {
-      setError(err.message || 'Registration failed. Please try again.')
+      if (err.message && err.message.toLowerCase().includes('failed to fetch')) {
+        setError('Failed to connect to backend. Please check that VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in Vercel Environment Variables and Redeployed.')
+      } else {
+        setError(err.message || 'Registration failed. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
