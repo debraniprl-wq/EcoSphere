@@ -4,7 +4,7 @@ export default function ExportReportModal({ isOpen, onClose }) {
   const [title, setTitle] = useState('EcoSphere ESG Performance Report Q3 2026')
   const [framework, setFramework] = useState('GRI')
   const [period, setPeriod] = useState('Q3 2026')
-  const [format, setFormat] = useState('csv')
+  const [format, setFormat] = useState('pdf')
   const [includeEnv, setIncludeEnv] = useState(true)
   const [includeSoc, setIncludeSoc] = useState(true)
   const [includeGov, setIncludeGov] = useState(true)
@@ -22,6 +22,112 @@ export default function ExportReportModal({ isOpen, onClose }) {
       let content = ''
       let mimeType = 'text/plain'
       let ext = 'txt'
+
+      if (format === 'pdf') {
+        // Create printable PDF window
+        const printWindow = window.open('', '_blank')
+        const htmlContent = `
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <title>${title}</title>
+            <style>
+              body { font-family: 'Segoe UI', system-ui, sans-serif; padding: 40px; color: #1e293b; max-width: 850px; margin: 0 auto; line-height: 1.6; }
+              .header { border-bottom: 2px solid #00C896; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; }
+              .logo { font-size: 24px; font-weight: 800; color: #059669; }
+              .title { font-size: 22px; font-weight: 700; color: #0f172a; margin-top: 5px; }
+              .meta { font-size: 13px; color: #64748b; }
+              .badge { display: inline-block; padding: 4px 12px; background: #e6f4ea; color: #047857; font-weight: 700; border-radius: 20px; font-size: 12px; }
+              .section { margin-bottom: 30px; }
+              .section-title { font-size: 16px; font-weight: 700; color: #047857; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; margin-bottom: 12px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+              th, td { padding: 10px; text-align: left; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
+              th { background: #f8fafc; font-weight: 600; color: #475569; }
+              .footer { margin-top: 50px; border-top: 1px solid #e2e8f0; padding-top: 15px; font-size: 11px; color: #94a3b8; text-align: center; }
+            </style>
+          </head>
+          <body>
+            <div class="header">
+              <div>
+                <div class="logo">🌿 EcoSphere ESG Platform</div>
+                <div class="title">${title}</div>
+              </div>
+              <div style="text-align: right;">
+                <span class="badge">${framework} Standard</span>
+                <div class="meta" style="margin-top: 6px;">Period: ${period} | Date: ${new Date().toLocaleDateString()}</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">Executive Summary</div>
+              <p>Overall ESG Performance Score: <strong>72/100 (Grade A)</strong> — Fully compliant with ${framework} sustainability reporting standards for ${period}.</p>
+            </div>
+
+            ${includeEnv ? `
+            <div class="section">
+              <div class="section-title">🌿 Environmental Performance Metrics</div>
+              <table>
+                <thead>
+                  <tr><th>Metric Name</th><th>Measured Value</th><th>Target</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Total GHG Emissions</td><td>3,280 tCO₂e</td><td>3,570 tCO₂e</td><td>↓ 8.2% (On Track)</td></tr>
+                  <tr><td>Renewable Energy Share</td><td>46.9% (1,850 MWh)</td><td>60.0%</td><td>↑ 12.5% (In Progress)</td></tr>
+                  <tr><td>Water Consumption</td><td>128,000 m³</td><td>134,000 m³</td><td>↓ 4.6% (On Track)</td></tr>
+                  <tr><td>Waste Recycled Share</td><td>67.3%</td><td>80.0%</td><td>↑ 6.8% (In Progress)</td></tr>
+                </tbody>
+              </table>
+            </div>` : ''}
+
+            ${includeSoc ? `
+            <div class="section">
+              <div class="section-title">👥 Social Metrics</div>
+              <table>
+                <thead>
+                  <tr><th>Metric Name</th><th>Measured Value</th><th>Target</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Total Workforce</td><td>2,847 employees</td><td>3,000</td><td>↑ 3.1% (On Track)</td></tr>
+                  <tr><td>Women in Leadership</td><td>38.0%</td><td>40.0%</td><td>Near Target</td></tr>
+                  <tr><td>Avg Training Hours</td><td>42 hrs / employee</td><td>40 hrs</td><td>Target Achieved</td></tr>
+                </tbody>
+              </table>
+            </div>` : ''}
+
+            ${includeGov ? `
+            <div class="section">
+              <div class="section-title">⚖️ Governance & Compliance</div>
+              <table>
+                <thead>
+                  <tr><th>Metric Name</th><th>Measured Value</th><th>Target</th><th>Status</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td>Regulatory Compliance Rate</td><td>94.2%</td><td>98.0%</td><td>Review Needed</td></tr>
+                  <tr><td>Active Corporate Policies</td><td>7 policies</td><td>7 policies</td><td>Target Achieved</td></tr>
+                  <tr><td>Ethics Training Coverage</td><td>87.0%</td><td>100.0%</td><td>In Progress</td></tr>
+                </tbody>
+              </table>
+            </div>` : ''}
+
+            <div class="footer">
+              EcoSphere ESG Management System — Verified Report Document — Page 1 of 1
+            </div>
+            <script>
+              window.onload = function() {
+                window.print();
+              }
+            </script>
+          </body>
+          </html>
+        `
+        printWindow.document.write(htmlContent)
+        printWindow.document.close()
+
+        setExporting(false)
+        setSuccess('PDF report window opened! Select "Save as PDF" to save file.')
+        setTimeout(() => { setSuccess(''); onClose(); }, 2000)
+        return
+      }
 
       if (format === 'csv') {
         mimeType = 'text/csv;charset=utf-8;'
@@ -61,7 +167,6 @@ export default function ExportReportModal({ isOpen, onClose }) {
         }
         content = JSON.stringify(data, null, 2)
       } else {
-        // Markdown / Summary Text
         mimeType = 'text/markdown;charset=utf-8;'
         ext = 'md'
         content = `# ${title}\n`
@@ -102,12 +207,12 @@ export default function ExportReportModal({ isOpen, onClose }) {
       URL.revokeObjectURL(url)
 
       setExporting(false)
-      setSuccess(`Successfully exported report as .${ext}!`)
+      setSuccess(`Exported report file successfully as .${ext}!`)
       setTimeout(() => {
         setSuccess('')
         onClose()
       }, 1500)
-    }, 600)
+    }, 500)
   }
 
   return (
@@ -164,23 +269,23 @@ export default function ExportReportModal({ isOpen, onClose }) {
 
             <div className="form-group">
               <label className="form-label">Export Format</label>
-              <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-2)' }}>
                 {[
-                  ['csv', '📊 CSV Dataset', 'Spreadsheet data'],
-                  ['md', '📄 Formatted Text', 'Markdown summary'],
-                  ['json', '⚙️ Raw JSON', 'API data structure'],
+                  ['pdf', '📕 PDF Document', 'Opens in Adobe Acrobat / Print'],
+                  ['csv', '📊 Excel / CSV', 'Opens in Microsoft Excel'],
+                  ['md', '📄 Text Summary', 'Opens in Notepad / Word'],
+                  ['json', '⚙️ Raw JSON', 'Structured API format'],
                 ].map(([f, label, sub]) => (
                   <button
                     key={f}
                     type="button"
                     onClick={() => setFormat(f)}
                     style={{
-                      flex: 1,
                       padding: 'var(--space-3)',
                       borderRadius: 'var(--radius-md)',
                       border: '1px solid',
                       borderColor: format === f ? 'var(--color-primary)' : 'var(--border-subtle)',
-                      background: format === f ? 'rgba(74, 222, 128, 0.1)' : 'var(--bg-700)',
+                      background: format === f ? 'rgba(74, 222, 128, 0.12)' : 'var(--bg-700)',
                       color: format === f ? 'var(--color-primary)' : 'var(--text-secondary)',
                       textAlign: 'left',
                       cursor: 'pointer',
@@ -188,7 +293,7 @@ export default function ExportReportModal({ isOpen, onClose }) {
                     }}
                   >
                     <div style={{ fontWeight: 600, fontSize: '0.8rem' }}>{label}</div>
-                    <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{sub}</div>
+                    <div style={{ fontSize: '0.66rem', color: 'var(--text-muted)' }}>{sub}</div>
                   </button>
                 ))}
               </div>
@@ -213,7 +318,7 @@ export default function ExportReportModal({ isOpen, onClose }) {
           <div className="modal-footer">
             <button type="button" className="btn btn-ghost" onClick={onClose}>Cancel</button>
             <button id="modal-export-download-btn" type="submit" className="btn btn-primary" disabled={exporting}>
-              {exporting ? <><div className="spinner" style={{ width: 14, height: 14 }} /> Exporting…</> : '📥 Download Report File'}
+              {exporting ? <><div className="spinner" style={{ width: 14, height: 14 }} /> Exporting…</> : format === 'pdf' ? '🖨️ Generate PDF Report' : '📥 Download Report File'}
             </button>
           </div>
         </form>
