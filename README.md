@@ -8,7 +8,7 @@ A modern ESG (Environmental, Social, and Governance) Management Platform designe
 
 ## 🚀 Live Demo
 
-🔗 https://eco-sphere-two-weld.vercel.app/dashboard
+🔗 https://eco-sphere-flax.vercel.app/auth
 
 ---
 
