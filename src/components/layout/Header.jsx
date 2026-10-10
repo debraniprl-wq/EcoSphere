@@ -12,7 +12,7 @@ const PAGE_META = {
   '/settings':      { title: 'Settings',          subtitle: 'Account, preferences & integrations' },
 }
 
-export default function Header({ onNotificationClick }) {
+export default function Header({ onNotificationClick, onHelpClick, unreadCount = 3 }) {
   const { pathname } = useLocation()
   const meta = PAGE_META[pathname] || { title: 'EcoSphere', subtitle: 'ESG Management Platform' }
   const now = new Date()
@@ -42,17 +42,39 @@ export default function Header({ onNotificationClick }) {
           id="header-notifications-btn"
           className="header-icon-btn"
           aria-label="Notifications"
+          title="Notifications"
           onClick={onNotificationClick}
         >
           🔔
-          <span className="notification-badge" aria-hidden="true" />
+          {unreadCount > 0 && (
+            <span
+              className="notification-badge"
+              aria-hidden="true"
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.6rem',
+                fontWeight: 700,
+                color: '#fff',
+                width: 16,
+                height: 16,
+                top: -5,
+                right: -5
+              }}
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </button>
 
         {/* Help */}
         <button
           id="header-help-btn"
           className="header-icon-btn"
-          aria-label="Help"
+          aria-label="Help & Documentation"
+          title="Help & Support"
+          onClick={onHelpClick}
         >
           ❓
         </button>

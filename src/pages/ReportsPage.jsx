@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import ExportReportModal from '../components/modals/ExportReportModal'
 
 const REPORTS = [
   {
@@ -46,11 +47,27 @@ const statusBadge = (s) => {
 export default function ReportsPage() {
   const [activeTab, setActiveTab] = useState('reports')
   const [search, setSearch] = useState('')
+  const [showGenerateModal, setShowGenerateModal] = useState(false)
+  const [selectedReport, setSelectedReport] = useState(null)
 
   const filtered = REPORTS.filter(r =>
     r.name.toLowerCase().includes(search.toLowerCase()) ||
     r.framework.toLowerCase().includes(search.toLowerCase())
   )
+
+  const handleDownload = (report, e) => {
+    e.stopPropagation()
+    const content = `EcoSphere ESG Report: ${report.name}\nFramework: ${report.framework}\nStatus: ${report.status}\nDate: ${report.date}\nPages: ${report.pages}\n\nGenerated automatically by EcoSphere ESG Platform.`
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${report.name.toLowerCase().replace(/[^a-z0-9]/g, '_')}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div>
@@ -62,7 +79,7 @@ export default function ReportsPage() {
               Generate, manage, and export ESG reports across all major sustainability frameworks.
             </p>
           </div>
-          <button id="reports-generate-btn" className="btn btn-primary">
+          <button id="reports-generate-btn" className="btn btn-primary" onClick={() => setShowGenerateModal(true)}>
             ✚ Generate Report
           </button>
         </div>
@@ -148,6 +165,7 @@ export default function ReportsPage() {
               }}
               onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-muted)'}
               onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
+              onClick={() => setSelectedReport(r)}
               >
                 <div style={{
                   width: 48, height: 48, borderRadius: 'var(--radius-md)',
@@ -168,8 +186,8 @@ export default function ReportsPage() {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', flexShrink: 0 }}>
                   <span className={`badge ${statusBadge(r.status)}`}>{r.status}</span>
-                  <button id={`report-download-${r.id}`} className="btn btn-ghost btn-sm">📥 Download</button>
-                  <button id={`report-view-${r.id}`} className="btn btn-secondary btn-sm">View →</button>
+                  <button id={`report-download-${r.id}`} className="btn btn-ghost btn-sm" onClick={(e) => handleDownload(r, e)}>📥 Download</button>
+                  <button id={`report-view-${r.id}`} className="btn btn-secondary btn-sm" onClick={() => setSelectedReport(r)}>View →</button>
                 </div>
               </div>
             ))}
@@ -183,7 +201,7 @@ export default function ReportsPage() {
             <div style={{ fontSize: '3rem', marginBottom: 'var(--space-4)' }}>📅</div>
             <div style={{ fontWeight: 600, marginBottom: 'var(--space-2)', color: 'var(--text-secondary)' }}>No scheduled reports</div>
             <div style={{ fontSize: '0.875rem' }}>Set up automated report generation on a schedule.</div>
-            <button id="schedule-report-btn" className="btn btn-primary" style={{ marginTop: 'var(--space-5)' }}>
+            <button id="schedule-report-btn" className="btn btn-primary" style={{ marginTop: 'var(--space-5)' }} onClick={() => setShowGenerateModal(true)}>
               Schedule a Report
             </button>
           </div>
@@ -196,11 +214,45 @@ export default function ReportsPage() {
             <div key={i} className="card" style={{ cursor: 'pointer', textAlign: 'center' }}>
               <div style={{ fontSize: '2.5rem', marginBottom: 'var(--space-3)' }}>📋</div>
               <div style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: 'var(--space-2)' }}>{t}</div>
-              <button id={`template-use-${i}`} className="btn btn-secondary btn-sm btn-full">Use Template</button>
+              <button id={`template-use-${i}`} className="btn btn-secondary btn-sm btn-full" onClick={() => setShowGenerateModal(true)}>Use Template</button>
             </div>
           ))}
         </div>
       )}
+
+      {/* Report View Modal */}
+      {selectedReport && (
+        <div className="modal-backdrop" onClick={e => e.target === e.currentTarget && setSelectedReport(null)}>
+          <div className="modal">
+            <div className="modal-header">
+              <div className="modal-title">📄 {selectedReport.name}</div>
+              <button className="modal-close" onClick={() => setSelectedReport(null)}>✕</button>
+            </div>
+            <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
+              <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+                <span className="badge badge-muted">Framework: {selectedReport.framework}</span>
+                <span className="badge badge-muted">Type: {selectedReport.type}</span>
+                <span className={`badge ${statusBadge(selectedReport.status)}`}>{selectedReport.status}</span>
+              </div>
+              <div style={{ background: 'var(--bg-700)', padding: 'var(--space-4)', borderRadius: 'var(--radius-md)', fontSize: '0.85rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                <p style={{ margin: 0 }}>This is an official <strong>{selectedReport.framework}</strong> compliance document generated on <strong>{selectedReport.date}</strong> containing <strong>{selectedReport.pages} pages</strong> ({selectedReport.size}).</p>
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button className="btn btn-ghost btn-sm" onClick={() => setSelectedReport(null)}>Close</button>
+              <button className="btn btn-primary btn-sm" onClick={(e) => { handleDownload(selectedReport, e); setSelectedReport(null); }}>
+                📥 Download Document
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Generate Report Modal */}
+      <ExportReportModal
+        isOpen={showGenerateModal}
+        onClose={() => setShowGenerateModal(false)}
+      />
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import {
   Chart as ChartJS,
   CategoryScale, LinearScale, PointElement, LineElement,
@@ -7,6 +8,8 @@ import {
 import { Line, Doughnut, Bar } from 'react-chartjs-2'
 import { useAuthStore } from '../store/authStore'
 import { formatNumber, formatTons, lastNMonths, scoreGrade } from '../lib/utils'
+import ExportReportModal from '../components/modals/ExportReportModal'
+import QuickAddDataModal from '../components/modals/QuickAddDataModal'
 
 ChartJS.register(
   CategoryScale, LinearScale, PointElement, LineElement,
@@ -131,9 +134,12 @@ function ScoreRing({ score, color, label, size = 100 }) {
 
 // ─── Main Component ────────────────────────────────────────────────────────────
 export default function DashboardPage() {
+  const navigate = useNavigate()
   const { profile, user } = useAuthStore()
   const displayName = profile?.full_name || user?.email?.split('@')[0] || 'there'
   const [activeTab, setActiveTab] = useState('overview')
+  const [showExportModal, setShowExportModal] = useState(false)
+  const [showAddDataModal, setShowAddDataModal] = useState(false)
 
   const overallScore = 72
   const envScore = 78
@@ -154,10 +160,18 @@ export default function DashboardPage() {
             </p>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-3)', flexShrink: 0 }}>
-            <button id="dashboard-export-btn" className="btn btn-secondary btn-sm">
+            <button
+              id="dashboard-export-btn"
+              className="btn btn-secondary btn-sm"
+              onClick={() => setShowExportModal(true)}
+            >
               📥 Export Report
             </button>
-            <button id="dashboard-add-data-btn" className="btn btn-primary btn-sm">
+            <button
+              id="dashboard-add-data-btn"
+              className="btn btn-primary btn-sm"
+              onClick={() => setShowAddDataModal(true)}
+            >
               ✚ Add Data
             </button>
           </div>
@@ -334,7 +348,13 @@ export default function DashboardPage() {
               <div className="section-title">🎯 Active Goals</div>
               <div className="section-subtitle">Top commitments progress</div>
             </div>
-            <button id="view-all-goals-btn" className="btn btn-ghost btn-sm">View all →</button>
+            <button
+              id="view-all-goals-btn"
+              className="btn btn-ghost btn-sm"
+              onClick={() => navigate('/goals')}
+            >
+              View all →
+            </button>
           </div>
           {GOALS.map((g, i) => (
             <div key={i} className="goal-item">
@@ -372,6 +392,17 @@ export default function DashboardPage() {
           ))}
         </div>
       </div>
+
+      {/* Modals */}
+      <ExportReportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+      />
+
+      <QuickAddDataModal
+        isOpen={showAddDataModal}
+        onClose={() => setShowAddDataModal(false)}
+      />
     </div>
   )
 }
